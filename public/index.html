@@ -1,0 +1,148 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Socratic Tutor</title>
+<style>
+:root{--bg:#f3f5f7;--panel:#fff;--ink:#14202b;--mute:#5d6b78;--line:#dbe2e8;--fill:#1f6f6b;--tint:#e3f1f0;--focus:#e0a526;--err:#b3402f;--you:#1f6f6b;--sh:0 1px 2px rgba(20,32,43,.06),0 6px 20px rgba(20,32,43,.06)}
+@media(prefers-color-scheme:dark){:root{--bg:#0f161c;--panel:#17212a;--ink:#e6edf3;--mute:#93a1ae;--line:#2a3844;--fill:#4fb3ad;--tint:#17312f;--focus:#e8b445;--err:#e8806d;--you:#23807a;--sh:none}}
+*{box-sizing:border-box}[hidden]{display:none!important}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;height:100dvh}
+header{display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{font-weight:700;font-size:17px;display:flex;align-items:center;gap:10px}.dot{width:14px;height:14px;border-radius:50%;background:var(--fill);box-shadow:5px 0 0 -2px var(--focus)}.sp{flex:1}
+button{font:inherit;color:inherit;padding:7px 13px;border:1px solid var(--line);border-radius:9px;background:var(--panel);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--fill)}button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.go{background:var(--fill);border-color:var(--fill);color:#fff;font-weight:600}.link{border:0;background:none;color:var(--fill);padding:0;text-decoration:underline}.mob{display:none}
+.app{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px}
+main{display:flex;flex-direction:column;min-height:0}
+#chat{flex:1;overflow:auto;padding:24px clamp(14px,4vw,48px);display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.m{max-width:min(70ch,92%);padding:11px 15px;border-radius:16px;font-size:15.5px;overflow-wrap:anywhere}
+.m p{margin:0 0 .6em}.m p:last-child{margin:0}.m ul,.m ol{margin:.3em 0 .6em;padding-left:1.3em}
+.m.tutor{background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start;box-shadow:var(--sh)}
+.m.user{background:var(--you);color:#fff;border-bottom-right-radius:5px;align-self:flex-end;white-space:pre-wrap}
+.m.err{background:var(--panel);border:1px solid var(--err);color:var(--err);align-self:flex-start}
+.m pre{background:var(--bg);padding:10px 12px;border-radius:8px;overflow:auto;font-size:13.5px;margin:.5em 0}.m code{font-size:.9em;background:var(--bg);padding:1px 5px;border-radius:4px}.m pre code{padding:0}
+.typing:empty::after{content:"Thinking…";color:var(--mute)}
+.hero{margin:auto;text-align:center;max-width:520px;padding:12px}.hero h1{font-size:28px;margin:0 0 6px;letter-spacing:-.01em}.hero p{color:var(--mute);margin:0 0 18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px}.chips button{border-radius:20px;background:var(--tint);border-color:transparent}
+.note{font-size:13px;color:var(--mute);margin-top:14px}
+.cmds{display:flex;gap:6px;flex-wrap:wrap;padding:8px clamp(14px,4vw,48px) 0}.cmds button{font-size:13px;padding:4px 11px;border-radius:16px}
+form{display:flex;gap:8px;align-items:flex-end;padding:10px clamp(14px,4vw,48px) 14px}
+textarea{flex:1;resize:none;font:inherit;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);max-height:160px}
+form button{padding:10px 18px;border-radius:12px}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:20px;overflow:auto}
+aside h2{font-size:17px;margin:0;overflow-wrap:anywhere}.sub{color:var(--mute);font-size:13px}
+.tot{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:12px 0 4px}.tot i{display:block;height:100%;width:0;background:var(--fill);transition:width .8s}
+.row{margin:14px 0;padding:2px 0 2px 10px;border-left:3px solid transparent}.row.focus{border-color:var(--focus)}
+.top{display:flex;gap:8px;align-items:baseline;font-size:14px}.top b{font-weight:600;flex:1;overflow-wrap:anywhere}.top span{color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+.top em{font-style:normal;font-size:11.5px;background:var(--focus);color:#14202b;border-radius:8px;padding:0 7px}
+.up{color:var(--fill);text-decoration:none}.dn{color:var(--err);text-decoration:none}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin:6px 0 2px}.seg i{height:11px;border-radius:3px;background:var(--bg);border:1px solid var(--line)}
+.seg i.on{background:var(--fill);border-color:var(--fill)}.seg i.new{animation:pop 1s}@keyframes pop{40%{background:var(--focus);border-color:var(--focus);transform:scaleY(1.7)}}
+small{color:var(--mute)}.empty{color:var(--mute);font-size:14px}details{margin-top:18px;color:var(--mute);font-size:13px}summary{cursor:pointer}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--ink);padding:22px;width:min(440px,92vw)}dialog::backdrop{background:rgba(10,16,22,.55)}
+dialog h2{margin:0 0 8px;font-size:18px}dialog input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.hint{font-size:13px;color:var(--mute)}.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}#kstat{min-height:1.4em;font-size:14px;margin:8px 0 0}
+@media(max-width:860px){.app{grid-template-columns:1fr}.mob{display:inline-block}
+ aside{position:fixed;left:0;right:0;bottom:0;max-height:68dvh;border:1px solid var(--line);border-radius:18px 18px 0 0;transform:translateY(105%);transition:transform .25s;z-index:5;box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+ body.mapopen aside{transform:none}header{padding:8px 12px}.brand span:last-child{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style></head><body>
+<header><div class="brand"><span class="dot"></span><span>Socratic Tutor</span></div><span class="sp"></span>
+<button id="mapbtn" class="mob" aria-expanded="false" aria-controls="map">Skill map</button><button id="new">New session</button><button id="keybtn">API key</button></header>
+<div class="app">
+<main><div id="chat" role="log" aria-live="polite" aria-label="Conversation"></div>
+<div class="cmds" role="group" aria-label="Quick commands"><button data-c="show progress" title="Update the skill map">Show progress</button><button data-c="harder" title="Raise the difficulty">Harder</button><button data-c="easier" title="Lower the difficulty">Easier</button><button data-c="just tell me" title="Skip the questions for this one answer">Just tell me</button><button data-c="save state" title="Get a block you can paste into a new session to resume">Save state</button></div>
+<form id="f"><textarea id="in" rows="1" aria-label="Your message"></textarea><button class="go" id="send">Send</button><button type="button" id="stop" hidden>Stop</button></form></main>
+<aside id="map" aria-label="Skill map"><h2 id="topic">Skill map</h2><div class="tot"><i id="tot"></i></div><div class="sub" id="pct">0% overall</div><div id="rows"></div>
+<details><summary>What the levels mean</summary><p>0 unaware, 1 heard of it, 2 follows along, 3 can do with help, 4 can do independently, 5 can teach it. Levels are earned across several checks, and can drop if you fail a review.</p></details></aside></div>
+<template id="heroT"><div class="hero" id="hero"><h1>What should I teach you?</h1><p>I start with a few questions to see what you know, then teach by asking. Levels are earned, never given.</p><div class="chips" id="chips"></div><button id="demo">Watch a demo</button><div class="note" id="hnote"></div></div></template>
+<dialog id="dlg"><form id="kf"><h2>Gemini API key</h2><p class="hint" id="dmsg">Needed to run live sessions.</p>
+<input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key" aria-label="Gemini API key">
+<p class="hint">Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. It is stored only in this browser and sent to this app's server, which forwards it to Google.</p>
+<p id="kstat" role="status"></p><div class="acts"><button type="button" id="krm">Remove key</button><button type="button" id="kx">Close</button><button class="go" id="ksave">Save and test</button></div></form></dialog>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const LV=['unaware','heard of it','follows along','with help','independent','can teach it'];
+const TOPICS=['SQL indexes','Python decorators','Bayes’ theorem','How HTTPS works','Photosynthesis'];
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
+let history=[],map=null,prev={},busy=false,demo=false,dirty=false,run=0,ctl=null,serverKey=false;
+const getKey=()=>store.get('gk')||'';
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function md(s){return s.split('```').map((p,i)=>{if(i%2)return'<pre><code>'+esc(p.replace(/^[\w-]*\n/,''))+'</code></pre>';
+ const h=esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');
+ return h.split(/\n{2,}/).filter(b=>b.trim()).map(b=>{const L=b.split('\n');
+  if(L.every(l=>/^\s*[-*] /.test(l)))return'<ul>'+L.map(l=>'<li>'+l.replace(/^\s*[-*] /,'')+'</li>').join('')+'</ul>';
+  if(L.every(l=>/^\s*\d+[.)] /.test(l)))return'<ol>'+L.map(l=>'<li>'+l.replace(/^\s*\d+[.)] /,'')+'</li>').join('')+'</ol>';
+  return'<p>'+L.join('<br>')+'</p>'}).join('')}).join('')}
+function bubble(r,t){const h=$('#hero');h&&h.remove();const d=document.createElement('div');d.className='m '+r;if(t)d.textContent=t;$('#chat').append(d);return d}
+const down=()=>{const c=$('#chat');c.scrollTop=c.scrollHeight};
+function stick(fn){const c=$('#chat'),n=c.scrollHeight-c.scrollTop-c.clientHeight<150;fn();if(n)c.scrollTop=c.scrollHeight}
+function render(m){map=m;const s=Array.isArray(m.subskills)?m.subskills:[];$('#topic').textContent=m.topic||'Skill map';
+ const lv=x=>Math.max(0,Math.min(5,Math.round(+x.level)||0)),pct=s.length?Math.round(s.reduce((a,x)=>a+lv(x),0)/(5*s.length)*100):0;
+ $('#tot').style.width=pct+'%';$('#pct').textContent=pct+'% overall';
+ $('#rows').innerHTML=s.length?s.map(x=>{const l=lv(x),p=prev[x.name],d=p===undefined?0:l-p;
+  return`<div class="row${x.focus?' focus':''}"><div class="top"><b>${esc(x.name)}</b>${x.focus?'<em>now</em>':''}<span>${d>0?'<u class="up" title="Level up">▲</u> ':d<0?'<u class="dn" title="Level down">▼</u> ':''}${l}/5</span></div><div class="seg">${[1,2,3,4,5].map(i=>`<i class="${i<=l?'on':''}${d>0&&i===l?' new':''}"></i>`).join('')}</div><small>${LV[l]}</small></div>`}).join(''):'<p class="empty">Your levels appear here after the first few questions.</p>';
+ prev={};s.forEach(x=>prev[x.name]=lv(x))}
+const blank=()=>{map=null;prev={};render({topic:'Skill map',subskills:[]})};
+const save=()=>{if(!demo)store.set('st',{history,map})};
+function ui(){const on=history.length>0&&!demo&&!busy;$$('[data-c]').forEach(b=>b.disabled=!on);$('#send').hidden=busy;$('#stop').hidden=!busy||demo;$('#send').disabled=demo;$('#in').disabled=demo;
+ $('#in').placeholder=history.length?'Type your answer. Enter to send, Shift+Enter for a new line.':'What do you want to learn? e.g. SQL indexes';
+ $('#keybtn').textContent=getKey()?'API key ✓':serverKey?'Shared key':'Add API key'}
+function hero(){$('#chat').innerHTML=$('#heroT').innerHTML;$('#chips').innerHTML=TOPICS.map(t=>`<button data-topic="${esc(t)}">${esc(t)}</button>`).join('');
+ $('#hnote').textContent=getKey()||serverKey?'':'Live sessions need a free Gemini API key. The demo works without one.'}
+function reset(){run++;ctl&&ctl.abort();busy=demo=dirty=false;history=[];store.del('st');blank();hero();ui();document.body.classList.remove('mapopen')}
+function restore(){const s=store.get('st');if(!s||!Array.isArray(s.history)||!s.history.length){blank();return hero()}
+ history=s.history;history.forEach(m=>{const b=bubble(m.role==='user'?'user':'tutor');m.role==='user'?b.textContent=m.content:b.innerHTML=md(m.content)});if(s.map)render(s.map);down()}
+function friendly(e){const m=e.message||'Something went wrong.';
+ if(e.status===429)return/shared limit/.test(m)?m:'Rate limit reached. Wait a minute, then retry.';
+ if(e.status!==401&&/API key|API_KEY|PERMISSION|permission/.test(m))return'Google did not accept the API key. Open "API key" to check it.';return m}
+function openDlg(msg){$('#dmsg').textContent=msg||'Needed to run live sessions.';$('#kstat').textContent='';$('#key').value='';$('#krm').hidden=!getKey();$('#dlg').showModal();$('#key').focus()}
+function start(text){text=text.trim();if(!text||busy||demo)return;
+ if(!getKey()&&!serverKey){$('#in').value=text;openDlg('Add a Gemini API key to start a live session, or try the demo first.');return}
+ if(dirty)reset();const c=history.length?text:'Teach me: '+text;history.push({role:'user',content:c});bubble('user',c);down();save();generate()}
+async function generate(){const my=run;busy=true;ui();ctl=new AbortController();const b=bubble('tutor');b.classList.add('typing');down();let acc='',err=null;
+ try{const r=await fetch('/api/chat',{method:'POST',signal:ctl.signal,headers:{'content-type':'application/json','x-user-key':getKey()},body:JSON.stringify({messages:history,map})});
+  const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+  for(;;){const{done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+   while((i=buf.indexOf('\n'))>=0){const l=buf.slice(0,i);buf=buf.slice(i+1);if(!l)continue;let e;try{e=JSON.parse(l)}catch{continue}
+    if(e.type==='text'){acc+=e.text;stick(()=>b.innerHTML=md(acc))}else if(e.type==='map'){render(e.map);save()}else if(e.type==='error')err=e}}
+ }catch(e){if(e.name==='AbortError'){if(my!==run)return}else err={message:'Connection lost. Check your internet and retry.'}}
+ if(my!==run)return;busy=false;b.classList.remove('typing');
+ if(err){b.className='m err';b.innerHTML=esc(friendly(err))+' <button class="link" data-retry>Retry</button>'}
+ else if(acc)history.push({role:'assistant',content:acc});else b.remove();
+ save();ui();$('#in').focus()}
+function playDemo(){if(busy||demo)return;(async()=>{reset();const my=run;demo=dirty=true;ui();$('#hero')?.remove();
+ for(const[w,t,m]of DEMO){if(my!==run)return;const b=bubble(w==='u'?'user':'tutor');
+  if(w==='u'){await sleep(1000);if(my!==run)return;b.textContent=t}
+  else{b.classList.add('typing');await sleep(600);if(my!==run)return;b.classList.remove('typing');let a='';for(const ch of t){if(my!==run)return;a+=ch;b.innerHTML=md(a);await sleep(10)}if(m){await sleep(250);render(m)}}
+  down();await sleep(500)}
+ if(my!==run)return;demo=false;ui();bubble('tutor').innerHTML='That was a scripted demo. Type a topic below to start a live session.';down()})()}
+const M=(l,f)=>({topic:'SQL indexes',subskills:['What an index is','B-tree lookups','Composite indexes','Reading EXPLAIN'].map((n,i)=>({name:n,level:l[i],focus:i===f}))});
+const DEMO=[['u','Teach me: SQL indexes'],
+['t','Before I teach anything, a few questions. A table has 10 million rows and no index on `email`. What happens when you run `SELECT * FROM users WHERE email = \'a@b.c\'`?'],
+['u','It checks every row until it finds it, I think.'],
+['t','Right, a sequential scan. Now you add an index on `email`. Why does the same query get faster, and what does the database now have to give up?',M([2,0,0,0],0)],
+['u','It jumps straight to the row. It has to store more data?'],
+['t','Partly. "Store more" is true but vague. What happens to the index when you INSERT a new row?',M([3,1,0,0],0)],
+['u','The index also has to be updated, so writes get slower.'],
+['t','Good, and you got there yourself. Level 3 for now; level 4 needs it unprompted later. Next: an index on `(country, city)`. Will it help `WHERE city = \'Pune\'` on its own?',M([3,1,0,0],2)],
+['u','Yes, it has city in it.'],
+['t','Not quite. If the index is sorted by country first, why can\'t the database binary-search for a city alone?',M([3,1,1,0],2)]];
+// events
+$('#f').onsubmit=e=>{e.preventDefault();const v=$('#in').value;$('#in').value='';$('#in').style.height='auto';start(v)};
+$('#in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('#f').requestSubmit()}});
+$('#in').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,160)+'px'});
+$('#stop').onclick=()=>ctl&&ctl.abort();
+$('#new').onclick=()=>{if(!history.length&&!demo&&!dirty)return;if(demo||confirm('Start a new session? The current one will be cleared.'))reset()};
+$('#chat').addEventListener('click',e=>{const t=e.target.closest('[data-topic],#demo,[data-retry]');if(!t)return;
+ if(t.id==='demo')playDemo();else if(t.dataset.retry!==undefined){t.closest('.m').remove();generate()}else start(t.dataset.topic)});
+$$('[data-c]').forEach(b=>b.onclick=()=>{if(!busy&&history.length&&!demo){history.push({role:'user',content:b.dataset.c});bubble('user',b.dataset.c);down();save();generate()}});
+$('#mapbtn').onclick=()=>{const o=document.body.classList.toggle('mapopen');$('#mapbtn').setAttribute('aria-expanded',o)};
+$('#keybtn').onclick=()=>openDlg();$('#kx').onclick=()=>$('#dlg').close();
+$('#krm').onclick=()=>{store.del('gk');ui();$('#dlg').close();if(!history.length)hero()};
+$('#kf').onsubmit=async e=>{e.preventDefault();const v=$('#key').value.trim(),s=$('#kstat');if(!v){s.textContent='Paste a key first.';return}
+ s.textContent='Testing…';$('#ksave').disabled=true;
+ try{const r=await(await fetch('/api/check',{headers:{'x-user-key':v}})).json();
+  if(r.ok){store.set('gk',v);s.textContent='Key works. Saved.';ui();if(!history.length)hero();setTimeout(()=>$('#dlg').close(),700)}else s.textContent=r.message||'Key was not accepted.'}
+ catch{s.textContent='Could not reach the server. Try again.'}$('#ksave').disabled=false};
+fetch('/api/status').then(r=>r.json()).then(s=>{serverKey=!!s.serverKey}).catch(()=>{}).finally(()=>{restore();ui()});
+</script></body></html>

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: socratic-tutor
+    runtime: node
+    buildCommand: echo no build needed
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: GEMINI_API_KEY   # optional: leave empty so visitors bring their own key
+        sync: false
